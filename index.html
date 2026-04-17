@@ -3,111 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة دحيح التعليمية 2026</title>
+    <title>منصة دحيح الاحترافية للملفات 2026</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
     <style>
-        :root { --primary: #2563eb; --accent: #f59e0b; --bg: #f8fafc; --white: #ffffff; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 0; color: #1e293b; }
-        header { background: var(--primary); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        :root { --main: #0f172a; --primary: #3b82f6; --accent: #10b981; --white: #ffffff; --bg: #f1f5f9; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--main); scroll-behavior: smooth; }
         
-        /* لوحة النشر السرية */
-        #admin-panel { display: none; background: var(--white); padding: 30px; border-radius: 25px; margin-top: -60px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border: 2px solid var(--accent); position: relative; z-index: 100; }
-        input, textarea { width: 100%; padding: 15px; border: 1.5px solid #e2e8f0; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 1rem; font-family: inherit; }
-        .btn-publish { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem; }
-        
-        /* شبكة الكروت */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-top: 50px; }
-        .card { background: white; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.3s; border-right: 6px solid var(--primary); position: relative; }
-        .card:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0,0,0,0.08); }
-        .delete-btn { position: absolute; top: 10px; left: 10px; color: #ef4444; cursor: pointer; font-size: 20px; }
-        .status-msg { text-align: center; padding: 60px; color: #94a3b8; grid-column: 1/-1; font-size: 1.3rem; }
+        /* Navigation */
+        nav { background: var(--main); color: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a { color: white; text-decoration: none; font-weight: 500; cursor: pointer; transition: 0.3s; }
+        .nav-links a:hover { color: var(--primary); }
+
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+
+        /* Pages logic */
+        .page { display: none; animation: fadeIn 0.5s ease; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Form Styling */
+        .card-form { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        input, textarea { width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 20px; box-sizing: border-box; font-size: 1rem; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 12px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4); }
+
+        /* Preview Page Style */
+        .preview-header { text-align: center; margin-bottom: 40px; }
+        .preview-box { background: white; border-radius: 30px; padding: 40px; text-align: center; border: 2px dashed var(--primary); }
+        .file-icon { font-size: 80px; color: var(--primary); margin-bottom: 20px; }
+        .action-btns { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 30px; }
+        .btn-action { padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; }
+        .download { background: var(--accent); color: white; }
+        .view { background: var(--main); color: white; }
+        .copy { background: #64748b; color: white; }
+
+        /* My Files Grid */
+        .files-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .file-card { background: white; padding: 20px; border-radius: 18px; position: relative; border: 1px solid #e2e8f0; transition: 0.3s; }
+        .file-card:hover { transform: scale(1.02); }
+
+        /* Notifications */
+        #notification-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; }
+        .toast { background: var(--main); color: white; padding: 15px 25px; border-radius: 10px; margin-top: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); animation: slideIn 0.3s forwards; display: flex; align-items: center; gap: 10px; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>🎓 منصة دحيح التعليمية</h1>
-    <p>مراجعات الشهادة الإعدادية - نشر مباشر وفعال</p>
-</header>
+<nav>
+    <div style="font-size: 1.5rem; font-weight: bold;">💎 منصة دحيح</div>
+    <div class="nav-links">
+        <a onclick="showPage('home')">الرئيسية</a>
+        <a onclick="showPage('my-files')">ملفاتي</a>
+    </div>
+</nav>
 
 <div class="container">
-    <div id="admin-panel">
-        <h2 style="color:var(--accent); margin-top:0;">🚀 نشر ملخص جديد</h2>
-        <input type="text" id="title" placeholder="عنوان المادة">
-        <textarea id="desc" rows="2" placeholder="وصف المراجعة..."></textarea>
-        <input type="text" id="fileUrl" placeholder="رابط الملف (جوجل درايف)">
-        <button class="btn-publish" onclick="publishLocally()">نشر في الموقع فوراً</button>
+    <div id="home" class="page active">
+        <div class="card-form">
+            <h2 style="margin-top:0;">📤 نشر ملف جديد</h2>
+            <input type="text" id="publisher" placeholder="اسم الناشر">
+            <input type="text" id="fileName" placeholder="عنوان الملف">
+            <input type="text" id="fileUrl" placeholder="رابط الملف المباشر">
+            <button class="btn-main" onclick="publishFile()">نشر الملف الآن</button>
+        </div>
     </div>
 
-    <div id="grid" class="grid"></div>
+    <div id="preview" class="page">
+        <div class="preview-header">
+            <h1 id="p-name">اسم الملف</h1>
+            <p>بواسطة: <span id="p-publisher">--</span></p>
+        </div>
+        <div class="preview-box">
+            <span class="material-symbols-rounded file-icon">description</span>
+            <div class="action-btns">
+                <button class="btn-action download" id="btn-download">
+                    <span class="material-symbols-rounded">download</span> تنزيل
+                </button>
+                <button class="btn-action view" id="btn-view">
+                    <span class="material-symbols-rounded">visibility</span> معاينة
+                </button>
+                <button class="btn-action copy" id="btn-copy">
+                    <span class="material-symbols-rounded">content_copy</span> نسخ الرابط
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="my-files" class="page">
+        <h2>📂 ملفاتي المنشورة</h2>
+        <div id="files-list" class="files-grid"></div>
+    </div>
 </div>
 
+<div id="notification-container"></div>
+
 <script>
-    // 🔐 تفعيل لوحة الإدمن بكود 1234
-    let keys = "";
-    window.addEventListener('keydown', (e) => {
-        keys += e.key;
-        if (keys.endsWith("1234")) {
-            document.getElementById('admin-panel').style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            keys = "";
-        }
-    });
-
-    // 📥 وظيفة النشر المباشر (بدون جداول)
-    function publishLocally() {
-        const title = document.getElementById('title').value;
-        const desc = document.getElementById('desc').value;
-        const fileUrl = document.getElementById('fileUrl').value;
-
-        if (!title || !fileUrl) return alert("اكمل البيانات أولاً يا دحيح!");
-
-        const newPost = { title, desc, fileUrl, id: Date.now() };
-
-        // حفظ في ذاكرة المتصفح
-        let posts = JSON.parse(localStorage.getItem('dahih_data') || "[]");
-        posts.unshift(newPost);
-        localStorage.setItem('dahih_data', JSON.stringify(posts));
-
-        alert("تم النشر بنجاح!");
-        location.reload();
+    // نظام إدارة الصفحات
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
     }
 
-    // 📤 عرض البيانات المخزنة
-    function loadDisplay() {
-        const posts = JSON.parse(localStorage.getItem('dahih_data') || "[]");
-        const grid = document.getElementById('grid');
+    // وظيفة النشر
+    function publishFile() {
+        const pub = document.getElementById('publisher').value;
+        const name = document.getElementById('fileName').value;
+        const url = document.getElementById('fileUrl').value;
 
-        if (posts.length === 0) {
-            grid.innerHTML = "<div class='status-msg'>المنصة بانتظار أول منشور.. اكتب 1234 للبدء!</div>";
+        if(!pub || !name || !url) return notify("يرجى ملء كافة الحقول!");
+
+        const fileId = "file_" + Date.now();
+        const fileData = { id: fileId, publisher: pub, name: name, url: url };
+
+        // حفظ في الذاكرة
+        let library = JSON.parse(localStorage.getItem('dahih_library') || "[]");
+        library.unshift(fileData);
+        localStorage.setItem('dahih_library', JSON.stringify(library));
+
+        notify("تم نشر ملفك بنجاح!");
+        
+        // الانتقال لصفحة المعاينة الخاصة بالملف
+        loadPreview(fileId);
+    }
+
+    // تحميل صفحة المعاينة
+    function loadPreview(id) {
+        const library = JSON.parse(localStorage.getItem('dahih_library') || "[]");
+        const file = library.find(f => f.id === id);
+
+        if(!file) return notify("الملف غير موجود!");
+
+        document.getElementById('p-name').innerText = file.name;
+        document.getElementById('p-publisher').innerText = file.publisher;
+        
+        document.getElementById('btn-download').onclick = () => window.open(file.url, '_blank');
+        document.getElementById('btn-view').onclick = () => window.open(file.url, '_blank');
+        document.getElementById('btn-copy').onclick = () => {
+            const secretLink = window.location.href.split('#')[0] + "#id=" + file.id;
+            navigator.clipboard.writeText(secretLink);
+            notify("تم نسخ رابط الصفحة السري!");
+        };
+
+        showPage('preview');
+        // تغيير الرابط في المتصفح ليكون رابط سري
+        window.location.hash = "id=" + file.id;
+    }
+
+    // عرض ملفاتي
+    function displayMyFiles() {
+        const library = JSON.parse(localStorage.getItem('dahih_library') || "[]");
+        const list = document.getElementById('files-list');
+        list.innerHTML = "";
+
+        if(library.length === 0) {
+            list.innerHTML = "<p>لم تنشر أي ملفات بعد.</p>";
             return;
         }
 
-        grid.innerHTML = posts.map(post => `
-            <div class="card" onclick="window.open('${post.fileUrl}', '_blank')">
-                <span class="material-symbols-rounded delete-btn" onclick="removeItem(event, ${post.id})">delete_forever</span>
-                <h3>${post.title}</h3>
-                <p>${post.desc || 'ملخص تعليمي متميز.'}</p>
-                <div style="color:var(--primary); font-weight:bold; display:flex; align-items:center; gap:5px;">
-                    <span class="material-symbols-rounded">download</span> تحميل الآن ←
+        library.forEach(file => {
+            list.innerHTML += `
+                <div class="file-card">
+                    <h3 style="margin-top:0">${file.name}</h3>
+                    <p style="font-size:0.8rem">الناشر: ${file.publisher}</p>
+                    <button class="btn-action view" style="width:100%" onclick="loadPreview('${file.id}')">دخول لصفحة الملف</button>
                 </div>
-            </div>
-        `).join('');
+            `;
+        });
     }
 
-    // حذف منشور
-    function removeItem(event, id) {
-        event.stopPropagation();
-        if(!confirm("هل متأكد من حذف هذا الملخص؟")) return;
-        let posts = JSON.parse(localStorage.getItem('dahih_data') || "[]");
-        posts = posts.filter(p => p.id !== id);
-        localStorage.setItem('dahih_data', JSON.stringify(posts));
-        location.reload();
+    // الإشعارات
+    function notify(msg) {
+        const container = document.getElementById('notification-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<span class="material-symbols-rounded">notifications</span> ${msg}`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
     }
 
-    loadDisplay();
+    // التحقق من الرابط عند الدخول (للوصول السري للملفات)
+    window.onload = () => {
+        const hash = window.location.hash;
+        if(hash && hash.includes("id=")) {
+            const id = hash.split("id=")[1];
+            loadPreview(id);
+        }
+        displayMyFiles();
+    };
+
+    // تحديث ملفاتي عند التغيير
+    setInterval(displayMyFiles, 2000);
+
 </script>
-
 </body>
 </html>
