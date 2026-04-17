@@ -10,14 +10,17 @@
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 0; color: #1e293b; }
         header { background: var(--primary); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
         .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        
+        /* لوحة النشر السرية */
         #admin-panel { display: none; background: var(--white); padding: 30px; border-radius: 25px; margin-top: -60px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border: 2px solid var(--accent); position: relative; z-index: 100; }
         input, textarea { width: 100%; padding: 15px; border: 1.5px solid #e2e8f0; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 1rem; font-family: inherit; }
         .btn-publish { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem; }
+        
+        /* شبكة الكروت */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-top: 50px; }
         .card { background: white; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.3s; border-right: 6px solid var(--primary); position: relative; }
         .card:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0,0,0,0.08); }
-        .delete-btn { position: absolute; top: 10px; left: 10px; color: #ef4444; cursor: pointer; display: none; }
-        #admin-panel .delete-mode .delete-btn { display: block; }
+        .delete-btn { position: absolute; top: 10px; left: 10px; color: #ef4444; cursor: pointer; font-size: 20px; }
         .status-msg { text-align: center; padding: 60px; color: #94a3b8; grid-column: 1/-1; font-size: 1.3rem; }
     </style>
 </head>
@@ -25,88 +28,85 @@
 
 <header>
     <h1>🎓 منصة دحيح التعليمية</h1>
-    <p>مراجعات الشهادة الإعدادية - نشر مباشر 2026</p>
+    <p>مراجعات الشهادة الإعدادية - نشر مباشر وفعال</p>
 </header>
 
 <div class="container">
     <div id="admin-panel">
-        <h2>🚀 إضافة ملخص جديد</h2>
-        <input type="text" id="title" placeholder="اسم المادة">
-        <textarea id="desc" rows="2" placeholder="وصف المراجعة"></textarea>
+        <h2 style="color:var(--accent); margin-top:0;">🚀 نشر ملخص جديد</h2>
+        <input type="text" id="title" placeholder="عنوان المادة">
+        <textarea id="desc" rows="2" placeholder="وصف المراجعة..."></textarea>
         <input type="text" id="fileUrl" placeholder="رابط الملف (جوجل درايف)">
-        <button class="btn-publish" onclick="publishNow()">نشر في الموقع فوراً</button>
-        <p style="font-size: 0.8rem; color: #64748b; margin-top: 10px;">* ملاحظة: البيانات تُحفظ في متصفحك الحالي.</p>
+        <button class="btn-publish" onclick="publishLocally()">نشر في الموقع فوراً</button>
     </div>
 
     <div id="grid" class="grid"></div>
 </div>
 
 <script>
-    // 🔐 تفعيل لوحة التحكم بـ 1234
+    // 🔐 تفعيل لوحة الإدمن بكود 1234
     let keys = "";
     window.addEventListener('keydown', (e) => {
         keys += e.key;
         if (keys.endsWith("1234")) {
             document.getElementById('admin-panel').style.display = 'block';
-            document.body.classList.add('admin-active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             keys = "";
         }
     });
 
-    // 📤 وظيفة النشر المباشر
-    function publishNow() {
+    // 📥 وظيفة النشر المباشر (بدون جداول)
+    function publishLocally() {
         const title = document.getElementById('title').value;
         const desc = document.getElementById('desc').value;
         const fileUrl = document.getElementById('fileUrl').value;
 
-        if (!title || !fileUrl) return alert("اكمل البيانات يا دحيح!");
+        if (!title || !fileUrl) return alert("اكمل البيانات أولاً يا دحيح!");
 
-        // إنشاء كائن للملخص الجديد
         const newPost = { title, desc, fileUrl, id: Date.now() };
 
-        // جلب البيانات القديمة أو إنشاء مصفوفة جديدة
-        const posts = JSON.parse(localStorage.getItem('dahih_posts') || "[]");
-        posts.unshift(newPost); // إضافة المنشور الجديد في البداية
-
-        // حفظ البيانات في ذاكرة المتصفح
-        localStorage.setItem('dahih_posts', JSON.stringify(posts));
+        // حفظ في ذاكرة المتصفح
+        let posts = JSON.parse(localStorage.getItem('dahih_data') || "[]");
+        posts.unshift(newPost);
+        localStorage.setItem('dahih_data', JSON.stringify(posts));
 
         alert("تم النشر بنجاح!");
-        location.reload(); // تحديث الصفحة لرؤية المنشور
+        location.reload();
     }
 
-    // 📥 وظيفة عرض البيانات من الذاكرة
-    function displayPosts() {
-        const posts = JSON.parse(localStorage.getItem('dahih_posts') || "[]");
+    // 📤 عرض البيانات المخزنة
+    function loadDisplay() {
+        const posts = JSON.parse(localStorage.getItem('dahih_data') || "[]");
         const grid = document.getElementById('grid');
 
         if (posts.length === 0) {
-            grid.innerHTML = "<div class='status-msg'>لا توجد ملخصات حالياً.. اكتب 1234 للنشر!</div>";
+            grid.innerHTML = "<div class='status-msg'>المنصة بانتظار أول منشور.. اكتب 1234 للبدء!</div>";
             return;
         }
 
         grid.innerHTML = posts.map(post => `
             <div class="card" onclick="window.open('${post.fileUrl}', '_blank')">
-                <span class="material-symbols-rounded delete-btn" onclick="deletePost(event, ${post.id})">delete</span>
+                <span class="material-symbols-rounded delete-btn" onclick="removeItem(event, ${post.id})">delete_forever</span>
                 <h3>${post.title}</h3>
-                <p>${post.desc || 'مراجعة تعليمية شاملة.'}</p>
-                <div style="color:var(--primary); font-weight:bold;">تحميل الملف ←</div>
+                <p>${post.desc || 'ملخص تعليمي متميز.'}</p>
+                <div style="color:var(--primary); font-weight:bold; display:flex; align-items:center; gap:5px;">
+                    <span class="material-symbols-rounded">download</span> تحميل الآن ←
+                </div>
             </div>
         `).join('');
     }
 
-    // وظيفة الحذف (تظهر للإدمن فقط)
-    function deletePost(event, id) {
-        event.stopPropagation(); // منع فتح الرابط عند الضغط على حذف
-        if(!confirm("هل تريد حذف هذا الملخص؟")) return;
-        
-        let posts = JSON.parse(localStorage.getItem('dahih_posts') || "[]");
+    // حذف منشور
+    function removeItem(event, id) {
+        event.stopPropagation();
+        if(!confirm("هل متأكد من حذف هذا الملخص؟")) return;
+        let posts = JSON.parse(localStorage.getItem('dahih_data') || "[]");
         posts = posts.filter(p => p.id !== id);
-        localStorage.setItem('dahih_posts', JSON.stringify(posts));
+        localStorage.setItem('dahih_data', JSON.stringify(posts));
         location.reload();
     }
 
-    displayPosts();
+    loadDisplay();
 </script>
 
 </body>
