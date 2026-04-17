@@ -117,7 +117,7 @@
         btn.disabled = true; btn.innerText = "جاري النشر...";
 
         try {
-            // المرحلة الأولى: رفع الملف لموقع خارجي للحصول على رابط
+            // الرفع لـ Catbox
             const formData = new FormData();
             formData.append("reqtype", "fileupload");
             formData.append("fileToUpload", selectedBlob);
@@ -125,32 +125,28 @@
             const uploadRes = await fetch("https://catbox.moe/user/api.php", { method: "POST", body: formData });
             const fileUrl = await uploadRes.text();
 
-            if(!fileUrl.includes("http")) throw new Error("Upload Failed");
+            if(!fileUrl.includes("http")) throw new Error();
 
-            // المرحلة الثانية: إرسال الرابط والبيانات لجدول جوجل
+            // إرسال البيانات للجدول بنفس الطريقة التي نجحت معك أول مرة
             const data = {
                 id: "F-" + Math.random().toString(36).substr(2, 9),
-                u: u, 
-                t: t, 
+                u: u, t: t, 
                 type: selectedBlob.name.split('.').pop().toUpperCase(), 
                 size: (selectedBlob.size/1024/1024).toFixed(2)+" MB",
                 date: new Date().toLocaleDateString('ar-EG'),
                 url: fileUrl
             };
 
-            // إرسال البيانات بشكل يضمن تخطي مشاكل الـ CORS
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                cache: 'no-cache',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+            await fetch(SCRIPT_URL, { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                body: JSON.stringify(data) 
             });
             
-            toast("✅ تم النشر بنجاح!");
+            toast("✅ تم النشر");
             setTimeout(() => location.reload(), 1500);
         } catch (e) {
-            toast("❌ حدث خطأ في الرفع أو الاتصال");
+            toast("❌ فشل النشر");
             btn.disabled = false; btn.innerText = "تأكيد ونشر الآن";
         }
     }
@@ -171,7 +167,7 @@
                     <span class="material-symbols-rounded">chevron_left</span>
                 </div>`;
             });
-        } catch (e) { list.innerHTML = "فشل تحديث القائمة"; }
+        } catch (e) { list.innerHTML = "جاري المزامنة..."; }
     }
 
     function viewFile(id) {
@@ -187,7 +183,7 @@
             <div class="file-icon"><span class="material-symbols-rounded" style="font-size:120px">description</span></div>
             <h1 style="font-size:2.5rem; margin:0;">${f.t}</h1>
             <div class="file-meta"><span>الصيغة: ${f.type}</span><span>•</span><span>الحجم: ${f.size}</span><span>•</span><span>التاريخ: ${f.date}</span></div>
-            <p style="margin-top:20px; font-weight:bold; opacity:0.6;">تم الرفع بواسطة: ${f.u}</p>
+            <p style="margin-top:20px; font-weight:bold; opacity:0.6;">الناشر: ${f.u}</p>
             <div style="margin-top:40px;">
                 <button class="btn btn-main" style="width:auto; padding:20px 60px;" onclick="startDownload()">بدء التحميل الآمن</button>
                 <br><button class="btn" style="background:transparent; color:var(--primary); margin-top:15px;" onclick="copyLink()">نسخ رابط الملف</button>
@@ -201,7 +197,7 @@
             s--; v.innerText = s;
             if(s <= 0) {
                 clearInterval(clock); o.style.display = 'none';
-                toast("✅ جاري التحميل...");
+                toast("✅ جاري التحميل");
                 window.open(activeFile.url, '_blank');
             }
         }, 1000);
