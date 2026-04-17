@@ -63,7 +63,7 @@
 <div class="container">
     <div id="home-page" class="page active-page">
         <h2 style="font-weight: 900; margin-bottom: 30px;">ملفاتك المنشورة</h2>
-        <div id="files-list">جاري تحميل الملفات من السحابة...</div>
+        <div id="files-list">جاري المزامنة...</div>
     </div>
 
     <div id="publish-page" class="page">
@@ -117,10 +117,9 @@
         const btn = document.getElementById('pub-btn');
         if(!selectedBlob || !u || !t || parseInt(a) !== capRes) return toast("❌ أكمل البيانات بشكل صحيح");
 
-        btn.disabled = true; btn.innerText = "جاري رفع الملف للسحابة...";
+        btn.disabled = true; btn.innerText = "جاري النشر...";
 
         try {
-            // رفع الملف فعلياً للحصول على رابط
             const formData = new FormData();
             formData.append("reqtype", "fileupload");
             formData.append("fileToUpload", selectedBlob);
@@ -144,7 +143,7 @@
             toast("✅ تم النشر بنجاح!");
             setTimeout(() => location.reload(), 1000);
         } catch (e) {
-            toast("❌ فشل الرفع.. حاول مرة أخرى");
+            toast("❌ حدث خطأ.. حاول مرة أخرى");
             btn.disabled = false; btn.innerText = "تأكيد ونشر الآن";
         }
     }
@@ -165,7 +164,7 @@
                     <span class="material-symbols-rounded">chevron_left</span>
                 </div>`;
             });
-        } catch (e) { list.innerHTML = "فشل تحميل الملفات من الجدول"; }
+        } catch (e) { list.innerHTML = "فشل تحديث القائمة"; }
     }
 
     function viewFile(id) {
