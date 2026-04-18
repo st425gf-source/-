@@ -68,6 +68,17 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzrOSP5BrtdXRXPODPlxYK8f1h78iYAYjjPHFLDGm-TUTUROCtiOlyZYNM2e2b7Zic/exec";
     let allFiles = [], activeFile;
 
+    // بيانات الملف الجديد (مراجعة الجبر)
+    const manualFile = {
+        id: "ALGEBRA_UNIT_1",
+        t: "مراجعة الجبر - الوحدة الأولى (ترم ثان)",
+        type: "PDF",
+        size: "1.2 MB",
+        date: "2024-05-19",
+        u: "المدير",
+        url: "#" // ضع رابط الملف هنا
+    };
+
     function toast(m) {
         const c = document.getElementById('notify-container');
         const t = document.createElement('div'); t.className = 'toast'; t.innerText = m;
@@ -79,9 +90,13 @@
         try {
             const res = await fetch(SCRIPT_URL);
             allFiles = await res.json();
+            
+            // إضافة ملف الجبر يدوياً بواسطة المدير في بداية القائمة
+            allFiles.unshift(manualFile);
+
             list.innerHTML = "";
             if(allFiles.length === 0) list.innerHTML = "لا توجد ملفات حالياً";
-            allFiles.reverse().forEach(f => {
+            allFiles.forEach(f => {
                 list.innerHTML += `<div class="file-item" onclick="viewFile('${f.id}')">
                     <div>
                         <h3 style="margin:0">${f.t}</h3>
@@ -91,7 +106,15 @@
                 </div>`;
             });
         } catch (e) {
-            list.innerHTML = "فشل تحميل الملفات من الجدول";
+            // في حال فشل السكريبت، نعرض ملف المدير فقط
+            allFiles = [manualFile];
+            list.innerHTML = `<div class="file-item" onclick="viewFile('${manualFile.id}')">
+                <div>
+                    <h3 style="margin:0">${manualFile.t}</h3>
+                    <span style="font-size:0.8rem; opacity:0.6">${manualFile.type} | ${manualFile.size}</span>
+                </div>
+                <span class="material-symbols-rounded">chevron_left</span>
+            </div>`;
         }
     }
 
@@ -126,13 +149,11 @@
                 
                 const url = activeFile.url;
                 if(url.startsWith('data:')) {
-                    // تحويل الكود (Base64) إلى ملف وتحميله
                     const link = document.createElement('a');
                     link.href = url;
                     link.download = activeFile.t + "." + activeFile.type.toLowerCase();
                     link.click();
                 } else {
-                    // فتح الرابط إذا كان رابطاً عادياً
                     window.open(url, '_blank');
                 }
             }
