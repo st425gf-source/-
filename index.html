@@ -76,7 +76,8 @@
         size: "1.2 MB",
         date: "2024-05-19",
         u: "المدير",
-        url: "#" // ضع رابط الملف هنا
+        // ملاحظة: استبدل رابط # برابط الملف الحقيقي لكي يعمل التحميل
+        url: "https://example.com/your-file.pdf" 
     };
 
     function toast(m) {
@@ -90,10 +91,7 @@
         try {
             const res = await fetch(SCRIPT_URL);
             allFiles = await res.json();
-            
-            // إضافة ملف الجبر يدوياً بواسطة المدير في بداية القائمة
             allFiles.unshift(manualFile);
-
             list.innerHTML = "";
             if(allFiles.length === 0) list.innerHTML = "لا توجد ملفات حالياً";
             allFiles.forEach(f => {
@@ -106,7 +104,6 @@
                 </div>`;
             });
         } catch (e) {
-            // في حال فشل السكريبت، نعرض ملف المدير فقط
             allFiles = [manualFile];
             list.innerHTML = `<div class="file-item" onclick="viewFile('${manualFile.id}')">
                 <div>
@@ -139,22 +136,27 @@
     }
 
     function startDownload() {
+        if(!activeFile || activeFile.url === "#") {
+            toast("❌ عذراً، رابط الملف غير متاح حالياً");
+            return;
+        }
+
         const o = document.getElementById('timer-screen'), v = document.getElementById('timer-val');
         let s = 30; o.style.display = 'flex'; v.innerText = s;
+        
         const clock = setInterval(() => {
             s--; v.innerText = s;
             if(s <= 0) {
-                clearInterval(clock); o.style.display = 'none';
-                toast("✅ جاري التحميل...");
+                clearInterval(clock); 
+                o.style.display = 'none';
+                toast("✅ جاري فتح الرابط...");
                 
                 const url = activeFile.url;
-                if(url.startsWith('data:')) {
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = activeFile.t + "." + activeFile.type.toLowerCase();
-                    link.click();
-                } else {
-                    window.open(url, '_blank');
+                // تعديل لضمان التحميل أو فتح النافذة
+                const win = window.open(url, '_blank');
+                if(!win) {
+                    // في حال حظر المتصفح للنوافذ المنبثقة
+                    window.location.href = url;
                 }
             }
         }, 1000);
